@@ -1,11 +1,16 @@
-class NameDB {
-  static names = new Set<string>();
+class NameRepository {
+  names = new Set<string>();
 
-  add(name: string): void {
-    NameDB.names.add(name);
+  assignUniqueName(): string {
+    let newName: string;
+    do {
+      newName = this.generateName();
+    } while (!newName || this.isNameUsed(newName));
+    this.addNameToDB(newName);
+    return newName;
   }
 
-  newName(): string {
+  generateName(): string {
     const newName = this.generateRandomLetter(2) + this.generateRandomDigit(3);
     return newName;
   }
@@ -29,24 +34,28 @@ class NameDB {
     }
     return digits;
   }
+
+  isNameUsed(name: string): boolean {
+    return this.names.has(name);
+  }
+
+  addNameToDB(name: string): void {
+    this.names.add(name);
+  }
 }
 
+const NAME_REPO = new NameRepository();
+
 class Robot {
-  private _name = '';
+  private _name = NAME_REPO.assignUniqueName();
 
   get name(): string {
     if (this._name) return this._name;
-
-    let newName = nameFactory.newName();
-    while (NameRepository.names.has(newName)) {
-      newName = nameFactory.newName();
-    }
-    this._name = newName;
-    NameRepository.names.add(newName);
-    return newName;
+    this._name = NAME_REPO.assignUniqueName();
+    return this._name;
   }
 
-  resetName(): void {
+  reset(): void {
     this._name = '';
   }
 }
